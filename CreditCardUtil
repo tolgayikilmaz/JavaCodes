@@ -1,0 +1,135 @@
+public class CCUtils
+    {
+        public static final int INVALID = -1;
+        public static final int VISA = 0;
+        public static final int MASTERCARD = 1;
+        private static final String[] cardNames ={   "Visa" , "Mastercard" };
+        
+  
+  public static boolean validCC(String number)
+     throws Exception
+        {
+            int CardID;
+            if ( (CardID = getCardType(number)) != -1)
+                return validCCNumber(number);
+        return false;
+    }
+
+    /**
+     * Card Tipleri dönen method 
+     *      INVALID          = -1;  
+     *      VISA             = 0;
+     *      MASTERCARD       = 1;
+     */
+    public static int getCardType(String number)
+    {
+        /* Kredi karti tpini anlayan method */
+        int valid = INVALID;
+
+        String digit1 = number.substring(0, 1);
+        String digit2 = number.substring(0, 2);
+        String digit3 = number.substring(0, 3);
+        String digit4 = number.substring(0, 4);
+
+        if (isNumber(number))
+        {
+            /* ---- 4 ile baslayan ve 13- 16 arasi karakter uzunugunda olanlar  VISA dır . */
+            if (digit1.equals("4"))
+            {
+                if (number.length() == 13 || number.length() == 16)
+                    valid = VISA;
+            }
+            /*  ilk iki karakter 51 ile 55 arasında olup 16 karakter uzunlugunda olanlar  MASTERCARD  dır */
+            else if (digit2.compareTo("51") >= 0 && digit2.compareTo("55") <= 0)
+            {
+                if (number.length() == 16)
+                    valid = MASTERCARD;
+            }
+        }
+        return valid;
+    }
+    /** Kart numarasini sayidanmi olusur */
+    public static boolean isNumber(String n)
+    {
+        /* Girilen rakam bir sayimi kontrol eden method  */
+        try
+        {
+            double d = Double.valueOf(n).doubleValue();
+            return true;
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /** Kart ismini  arraydan  alarak ismi donen method*/
+    public static String getCardName(int id)
+    {
+        return (id > -1 && id < cardNames.length ? cardNames[id] : "");
+    }
+
+    /** Kart numarasini kontrol eden method*/
+    public static boolean validCCNumber(String n)
+    {
+        try
+        {
+            int j = n.length();
+
+            String[] s1 = new String[j];
+            for (int i = 0; i < n.length(); i++) s1[i] = "" + n.charAt(i);
+
+            int checksum = 0;
+
+            for (int i = s1.length - 1; i >= 0; i -= 2)
+            {
+                int k = 0;
+
+                if (i > 0)
+                {
+                    k = Integer.valueOf(s1[i - 1]).intValue() * 2;
+                    if (k > 9)
+                    {
+                        String s = "" + k;
+                        k = Integer.valueOf(s.substring(0, 1)).intValue() +
+                            Integer.valueOf(s.substring(1)).intValue();
+                    }
+                    checksum += Integer.valueOf(s1[i]).intValue() + k;
+                }
+                else
+                    checksum += Integer.valueOf(s1[0]).intValue();
+            }
+            return ((checksum % 10) == 0);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /** Ana method kod burdan baslatilarak kart numarasini okur ve  sonucu doner*/
+    public static void main(String args[]) throws Exception
+    {
+        String aCard = "";
+    
+    if (args.length > 0) 
+      aCard = args [0];
+    else {
+            BufferedReader input =
+              new BufferedReader(new InputStreamReader(System.in));
+            System.out.print("Kart numarasi: ");
+            aCard = input.readLine(); /** kart numarasini okuyup doldurur */
+        }
+    if (getCardType(aCard) > -1) { /**  Invalid degilse  anaislemleri yapar*/
+            System.out.println("Gecerli bir kart numarasi.");
+            System.out.println("Bu bir  " + getCardName(getCardType(aCard))); /** Ekrana kart tipini yazar */
+            System.out.println( aCard + " numarali kart numarasi  " + (validCC(aCard) ? " gecerli." : " gecersiz.")); /** ValidCC methodundan gelen degere gore gecerli olup olmadiginiyazar */
+        }
+    else
+       System.out.println("Gecerli bir kart numarasi degil"); /** -1 ise  invalid kat numaraisidir direk keser */
+    }
+}
+}
